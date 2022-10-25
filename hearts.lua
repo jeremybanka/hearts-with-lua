@@ -1,28 +1,9 @@
-local lib = require "lib.index"
+local newGame = require "lib.game"
+local speech  = require "lib.speech"
+local cards   = require "lib.cards"
+local util    = require "lib.util"
 
--- get playable cards for a player
-local function getPlayableCards(game, player)
-  local playableCards = {}
-  for _, card in ipairs(player.hand) do
-    local rank = card:sub(1, -2)
-    local suit = card:sub(-1)
-    if rank == 'Q' and suit == '♠' then
-      -- queen of spades is always playable
-      table.insert(playableCards, card)
-    elseif #game.trick == 0 then
-      -- first card in trick is always playable
-      table.insert(playableCards, card)
-    else
-      -- otherwise, playable cards must match suit of first card
-      local firstCard = game.trick[1]
-      local firstCardSuit = firstCard:sub(-1)
-      if suit == firstCardSuit then
-        table.insert(playableCards, card)
-      end
-    end
-  end
-  return playableCards
-end
+
 
 -- heads up display
 local function render(game, player)
@@ -31,40 +12,47 @@ local function render(game, player)
   print('Trick: [ ' .. table.concat(game.trick, ' ') .. ' ]')
   print(player.name .. "'s hand: [ " .. table.concat(player.hand, ', ') .. ' ]')
   print(player.name .. ' may play the following cards:')
-  local playableCards = getPlayableCards(game, player)
+  local playableCards = game:getPlayableCards(player.name)
   for i, card in ipairs(playableCards) do
-    print('  ' .. i, card)
+    print('  ' .. i, cards.name(card))
   end
 end
 
--- take turn
+---take turn
 local function yourTurn(game, player)
-  lib.speech.say(player.name .. "'s turn")
+  speech.say(player.name .. "'s turn")
   render(game, player)
   io.write('Enter a number to play a card: ')
   local cardIdx = io.read('*n')
-  local card = table.remove(player.hand, cardIdx)
-  table.insert(game.trick, card)
-  print(player.name .. ' plays ' .. lib.cards.name(card:sub(1, -2), card:sub(-1)))
+  local chosenCard = game:getPlayableCards(player.name)[cardIdx]
+  if chosenCard then
+    local cardIdxInHand = util.indexOf(player.hand, chosenCard)
+    local card = table.remove(player.hand, cardIdxInHand)
+    table.insert(game.trick, card)
+    print(player.name .. ' plays ' .. cards.name(card))
+  else
+    speech.say('Invalid card')
+  end
 end
 
--- prompt to continue
-local function promptContinue()
-  io.write('(Press RETURN to continue)')
+---prompt your player to continue
+---@param message? string `Press RETURN to ${message}`
+local function whenReady(message)
+  local doWhatever = message or 'continue'
+  io.write('(Press RETURN to ' .. doWhatever .. ')')
   _ = io.read()
   os.execute('clear')
 end
 
 local function playGame()
-  local game = lib.game
-  promptContinue()
-  game
+  whenReady()
+  local game = newGame
       :addPlayer('Kris')
       :addPlayer('Susie')
-  lib.player.add(game, 'Ralsei')
-  lib.player.add(game, 'Noelle')
-  lib.player.possess(game, 'Kris')
-  lib.game.dealAllCards(game)
+      :addPlayer('Ralsei')
+      :addPlayer('Noelle')
+      :playAs('Kris')
+      :dealAllCards()
   yourTurn(game, game.players[1])
   render(game, game.players[1])
   -- printTableRecursive(game)

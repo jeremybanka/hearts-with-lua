@@ -1,5 +1,18 @@
--- add a player to the game
-local function addPlayer(game, playerName)
+---@class playerlib : table A library of functions for handling players.
+local playerlib = {}
+
+---@class player : table
+---@field name string
+---@field hand string[]
+---@field tricksTaken string[][]
+---@field score number
+---@field isVessel boolean
+
+---create a new player
+---@param playerName string
+---@return player
+function playerlib.new(playerName)
+  ---@type player
   local player = {
     name = playerName,
     hand = {},
@@ -7,25 +20,7 @@ local function addPlayer(game, playerName)
     score = 0,
     isVessel = false
   }
-  table.insert(game.players, player)
+  return player
 end
 
--- possess player
-local function possessPlayer(game, playerName)
-  for _, player in ipairs(game.players) do
-    if player.name == playerName then
-      player.isVessel = true
-    end
-  end
-end
-
--- is the player you?
-local function isYou(player)
-  return player.isVessel
-end
-
-return {
-  add = addPlayer,
-  possess = possessPlayer,
-  isYou = isYou
-}
+return playerlib
