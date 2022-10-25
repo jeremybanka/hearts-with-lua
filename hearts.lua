@@ -1,7 +1,4 @@
-local speech   = require "lib.speech"
-local cardGame = require "lib.cardGame"
-local cards    = require "lib.cards"
-local player   = require "lib.player"
+local lib = require "lib.index"
 
 -- get playable cards for a player
 local function getPlayableCards(game, player)
@@ -42,13 +39,13 @@ end
 
 -- take turn
 local function yourTurn(game, player)
-  speech.say(player.name .. "'s turn")
+  lib.speech.say(player.name .. "'s turn")
   render(game, player)
   io.write('Enter a number to play a card: ')
   local cardIdx = io.read('*n')
   local card = table.remove(player.hand, cardIdx)
   table.insert(game.trick, card)
-  print(player.name .. ' plays ' .. cards.name(card:sub(1, -2), card:sub(-1)))
+  print(player.name .. ' plays ' .. lib.cards.name(card:sub(1, -2), card:sub(-1)))
 end
 
 -- prompt to continue
@@ -59,15 +56,17 @@ local function promptContinue()
 end
 
 local function playGame()
-  local game = cardGame.init()
+  local game = lib.game
   promptContinue()
-  player.add(game, 'Kris')
-  player.add(game, 'Susie')
-  player.add(game, 'Ralsei')
-  player.add(game, 'Noelle')
-  player.possess(game, 'Kris')
-  cardGame.dealAllCards(game)
+  game
+      :addPlayer('Kris')
+      :addPlayer('Susie')
+  lib.player.add(game, 'Ralsei')
+  lib.player.add(game, 'Noelle')
+  lib.player.possess(game, 'Kris')
+  lib.game.dealAllCards(game)
   yourTurn(game, game.players[1])
+  render(game, game.players[1])
   -- printTableRecursive(game)
 end
 
@@ -78,4 +77,4 @@ playGame()
 -- when it becomes a player's turn
 -- if they are the vessel, call the player's turn function
 -- otherwise, call the npc's turn function
--- each time something happens, re
+-- each time something happens, render
