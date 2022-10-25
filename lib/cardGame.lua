@@ -11,27 +11,6 @@ local function initGame()
   }
 end
 
--- add a player to the game
-local function addPlayer(game, playerName)
-  local player = {
-    name = playerName,
-    hand = {},
-    tricksTaken = {},
-    score = 0,
-    isVessel = false
-  }
-  table.insert(game.players, player)
-end
-
--- possess player
-local function possessPlayer(game, playerName)
-  for _, player in ipairs(game.players) do
-    if player.name == playerName then
-      player.isVessel = true
-    end
-  end
-end
-
 -- deal a card to a player
 local function dealCard(game, player)
   local card = table.remove(game.deck)
@@ -54,7 +33,5 @@ end
 
 return {
   init = initGame,
-  addPlayer = addPlayer,
-  possessPlayer = possessPlayer,
   dealAllCards = dealAllCards
 }

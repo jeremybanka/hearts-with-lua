@@ -1,6 +1,7 @@
 local speech   = require "lib.speech"
 local cardGame = require "lib.cardGame"
 local cards    = require "lib.cards"
+local player   = require "lib.player"
 
 -- get playable cards for a player
 local function getPlayableCards(game, player)
@@ -60,11 +61,11 @@ end
 local function playGame()
   local game = cardGame.init()
   promptContinue()
-  game(game, 'Kris')
-  cardGame.addPlayer(game, 'Susie')
-  cardGame.addPlayer(game, 'Ralsei')
-  cardGame.addPlayer(game, 'Noelle')
-  cardGame.possessPlayer(game, 'Kris')
+  player.add(game, 'Kris')
+  player.add(game, 'Susie')
+  player.add(game, 'Ralsei')
+  player.add(game, 'Noelle')
+  player.possess(game, 'Kris')
   cardGame.dealAllCards(game)
   yourTurn(game, game.players[1])
   -- printTableRecursive(game)
@@ -73,8 +74,6 @@ end
 playGame()
 
 -- printTable(createDeck())
-
-
 -- add a turn order mechanic
 -- when it becomes a player's turn
 -- if they are the vessel, call the player's turn function
