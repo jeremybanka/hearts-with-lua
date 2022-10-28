@@ -1,10 +1,13 @@
-# ♥️ HEARTS ♥️
+<div align="center">
+  <img alt="hearts cover" src="https://raw.githubusercontent.com/jeremybanka/hearts-with-lua/main/hearts%20cover.png"/> 
+</div>
 
 #### By Jeremy Banka
 
 ## Technologies Used
 
 - 🖋 Lua
+- 🚧 [Sumneko Lua Language Server](https://github.com/sumneko/lua-language-server) (very handy devtool)
 
 ## Description
 
