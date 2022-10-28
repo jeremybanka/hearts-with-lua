@@ -5,9 +5,11 @@ local util      = require "lib.util"
 ---@class gamelib : table A library of functions for a card game.
 ---@field deck string[]
 ---@field heartsBroken boolean
----@field trick string[]
+---@field trick table<string, string>
 ---@field players player[]
 ---@field turn integer
+---@field round integer
+--
 local gamelib = {}
 
 gamelib.deck = deck.shuffle(deck.create())
@@ -90,7 +92,9 @@ function gamelib.getPlayableCards(game, playerName)
   end
   local playableCards = {}
 
-  local leadingSuit = #game.trick > 0 and game.trick[1]:sub(-1) or nil
+  local trickEntries = util.entries(game.trick)
+
+  local leadingSuit = #trickEntries > 0 and trickEntries[1].val:sub(-1) or nil
   local playerMustFollowSuit = util.some(
     player.hand,
     function(card)
@@ -108,7 +112,7 @@ function gamelib.getPlayableCards(game, playerName)
   for _, card in ipairs(player.hand) do
     local suit = card:sub(-1)
 
-    if #game.trick == 0 then
+    if #trickEntries == 0 then
 
       -- print("suit ~= 'H'", suit ~= 'H')
       -- print("game.heartsBroken", game.heartsBroken)
@@ -125,6 +129,79 @@ function gamelib.getPlayableCards(game, playerName)
     end
   end
   return playableCards
+end
+
+---get player with the two of clubs
+---@param game gamelib
+---@return player?
+function gamelib.getVessel(game)
+  for _, player in ipairs(game.players) do
+    if util.contains(player.hand, '2C') then
+      return player
+    end
+  end
+end
+
+---get characters who are controlled by the player
+---@param game gamelib
+---@return player[]
+function gamelib.getVessels(game)
+  local vessels = {}
+  for _, player in ipairs(game.players) do
+    if player.isVessel then
+      table.insert(vessels, player)
+    end
+  end
+  return vessels
+end
+
+---get the player whose turn it is
+---@param game gamelib
+---@return player?
+function gamelib.getCurrentPlayer(game)
+  return game.players[game.turn]
+end
+
+---get summary array for a player
+---@param game gamelib
+---@param player player
+---@return string[]
+function gamelib.getPlayerStats(game, player)
+  local summary = {}
+  local playerIsCurrent = game:getCurrentPlayer() == player
+  local markers = ""
+  ---if it's the player's turn, mark it
+  if playerIsCurrent then
+    markers = markers .. "* "
+  end
+  ---if the player is a vessel, mark it
+  if player.isVessel then
+    markers = markers .. "(you)"
+  end
+  local trickFallback = ""
+  if (playerIsCurrent) then
+    trickFallback = "..."
+  end
+  table.insert(summary, markers)
+  table.insert(summary, player.name)
+  table.insert(summary, game.trick[player.name] or trickFallback)
+  table.insert(summary, "tricks: " .. #player.tricksTaken)
+  for _, trick in ipairs(player.tricksTaken) do
+    table.insert(summary, table.concat(trick, ", "))
+  end
+  return summary
+end
+
+---get array of player summary arrays
+---@param game gamelib
+---@return string[][]
+function gamelib.getAllPlayerStats(game)
+  local function statsOf(player)
+    return game:getPlayerStats(player)
+  end
+
+  local stats = util.map(game.players, statsOf)
+  return stats
 end
 
 return gamelib

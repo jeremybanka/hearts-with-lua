@@ -16,7 +16,7 @@ local function nameCard(card)
   local rank = card:sub(1, -2)
   local suit = card:sub(-1)
   if rank == 'J' and suit == 'S' then
-    return 'Lancer'
+    return 'LANCER'
   else
     return rank .. FANCY_SUITS[suit]
   end

@@ -2,6 +2,9 @@ local newGame = require "lib.game"
 local speech  = require "lib.speech"
 local cards   = require "lib.cards"
 local util    = require "lib.util"
+local layout  = require "lib.layout"
+local printer = require "lib.printer"
+local player  = require "lib.player"
 
 
 
@@ -36,7 +39,7 @@ local function yourTurn(game, player)
 end
 
 ---prompt your player to continue
----@param message? string `Press RETURN to ${message}`
+---@param message? string `(Press RETURN to ${message})`
 local function whenReady(message)
   local doWhatever = message or 'continue'
   io.write('(Press RETURN to ' .. doWhatever .. ')')
@@ -44,8 +47,19 @@ local function whenReady(message)
   os.execute('clear')
 end
 
+local function printHandOfP(game)
+  local vessels = game:getVessels()
+  ---@type
+  local hands = util.map(
+    vessels,
+    function(vessel)
+      return
+    end
+  )
+end
+
 local function playGame()
-  whenReady()
+  whenReady('start game')
   local game = newGame
       :addPlayer('Kris')
       :addPlayer('Susie')
@@ -53,8 +67,21 @@ local function playGame()
       :addPlayer('Noelle')
       :playAs('Kris')
       :dealAllCards()
-  yourTurn(game, game.players[1])
-  render(game, game.players[1])
+  local vessels = game:getVessels()
+  local you = vessels[1]
+  local handContent = player.handContent(you)
+  print("YOUR HAND:")
+  printer.wrapping(handContent)
+  print()
+  print()
+  local playerStats = game:getAllPlayerStats()
+  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
+  print()
+  print()
+  print("It's your turn!")
+
+  -- yourTurn(game, game.players[1])
+  -- render(game, game.players[1])
   -- printTableRecursive(game)
 end
 
