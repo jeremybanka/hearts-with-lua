@@ -87,7 +87,7 @@ end
 function util.entries(obj)
   local result = {}
   for key, val in pairs(obj) do
-    table.insert(result, { key, val })
+    table.insert(result, { key = key, val = val })
   end
   return result
 end

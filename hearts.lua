@@ -2,54 +2,95 @@ local newGame   = require "lib.game"
 local speech    = require "lib.speech"
 local cards     = require "lib.cards"
 local util      = require "lib.util"
-local layout    = require "lib.layout"
 local printer   = require "lib.printer"
 local playerlib = require "lib.player"
 
----take turn
-local function yourTurn(game, player)
-  speech.say(player.name .. "'s turn")
-  render(game, player)
-  io.write('Enter a number to play a card: ')
-  local cardIdx = io.read('*n')
-  local chosenCard = game:getPlayableCards(player.name)[cardIdx]
-  if chosenCard then
-    local cardIdxInHand = util.indexOf(player.hand, chosenCard)
-    local card = table.remove(player.hand, cardIdxInHand)
-    table.insert(game.trick, card)
-    print(player.name .. ' plays ' .. cards.name(card))
-  else
-    speech.say('Invalid card')
-  end
-end
-
--- heads up display
-local function printHud(game)
-  local vessels = game:getVessels()
-  local you = vessels[1]
-  local handContent = playerlib.handContent(you)
-  print("YOUR HAND:")
-  printer.wrapping(handContent)
-  print()
-  print()
-  local playerStats = game:getAllPlayerStats()
-  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
-  print()
-  print()
-  print("It's your turn!")
-end
+_ = {}
 
 ---prompt your player to continue
 ---@param message? string `(Press RETURN to ${message})`
 local function whenReady(message)
   local doWhatever = message or 'continue'
-  io.write('(Press RETURN to ' .. doWhatever .. ')')
+  io.write('(Press RETURN ⏎ to ' .. doWhatever .. ')')
   _ = io.read()
+end
+
+---heads up display
+---@param game gamelib
+---@return nil
+local function printHud(game)
   os.execute('clear')
+  local vessels = game:getVessels()
+  for _, vessel in ipairs(vessels) do
+    local handContent = vessel:readHand()
+    print("YOUR HAND (" .. vessel.name .. ")")
+    printer.wrapping(handContent)
+    print()
+    print()
+  end
+  local playerStats = game:getAllPlayerStats()
+  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
+  print()
+  print()
+end
+
+---their turn
+---@param game gamelib
+---@param player player
+---@return nil
+local function theirTurn(game, player)
+  printHud(game)
+  speech.say("It's " .. player.name .. "'s turn.")
+  whenReady()
+  local playableCards = game:getPlayableCards(player.name)
+  local chosenCard = playableCards[1]
+  game:playCard(player.name, chosenCard)
+  printHud(game)
+  print("* It's " .. player.name .. "'s turn.")
+  speech.say(player.name .. " played " .. cards.name(chosenCard) .. "!")
+  whenReady()
+  game:endTurn()
+end
+
+---your turn
+---@param game gamelib
+---@param player player
+---@return nil
+local function yourTurn(game, player)
+
+  printHud(game)
+  speech.say("It's your turn!")
+  whenReady("choose a card to play")
+
+  local playableCards = game:getPlayableCards(player.name)
+  printHud(game)
+  print("* It's your turn!")
+  speech.say('Enter a number to play a card: ')
+  local prettyPlayableCards = util.map(
+    playableCards,
+    function(card)
+      return cards.name(card)
+    end
+  )
+  printer.list(prettyPlayableCards, { indentFirstLine = 2, })
+  print("(Press the number of the card you wish to play, then press RETURN ⏎)")
+  io.write("> ")
+  local cardIdx = io.read('*n')
+  local chosenCard = playableCards[cardIdx] or playableCards[1]
+  game:playCard(player.name, chosenCard)
+  _ = io.read() -- for some reason the program needs but ignores this line
+
+  printHud(game)
+  print("* It's your turn!")
+  speech.say("You played " .. cards.name(chosenCard) .. ".")
+  whenReady()
+  game:endTurn()
+
 end
 
 local function playGame()
-  whenReady('start game')
+  os.execute('clear')
+  -- whenReady('start game')
   local game = newGame
       :addPlayer('Kris')
       :addPlayer('Susie')
@@ -57,23 +98,18 @@ local function playGame()
       :addPlayer('Noelle')
       :playAs('Kris')
       :dealAllCards()
-  printHud(game)
 
   while not game:isOver() do
     local player = game:getCurrentPlayer()
-    yourTurn(game, player)
-    whenReady('continue')
-    printHud(game)
+    if player then
+      if player.isVessel then
+        yourTurn(game, player)
+      else
+        theirTurn(game, player)
+      end
+    end
   end
-
   print('Game over!')
 end
 
 playGame()
-
--- printTable(createDeck())
--- add a turn order mechanic
--- when it becomes a player's turn
--- if they are the vessel, call the player's turn function
--- otherwise, call the npc's turn function
--- each time something happens, render

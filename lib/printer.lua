@@ -61,6 +61,7 @@ function printerlib.wrapping(content, options)
   printerlib.lines(lines)
 end
 
+---PARAGRAPH
 ---print a paragraph of content
 ---@param text string
 ---@param options? WrappingPrinterOptions
@@ -74,6 +75,28 @@ function printerlib.paragraph(text, options)
     end
   )
   printerlib.wrapping(content, options)
+end
+
+---LIST
+---print a numerical list of content
+---@param content string[]
+---@param options? WrappingPrinterOptions
+---@return nil
+function printerlib.list(content, options)
+  options = options or {}
+  options = util.merge(printerlib.defaultWrappingPrinterOptions, options)
+  local indent = string.rep(' ', options.indentFirstLine)
+  local numberedContent = util.map(
+    content,
+    function(item, index, array)
+      local pad = ""
+      if index < 10 and #array > 9 then
+        pad = " "
+      end
+      return indent .. pad .. index .. '. ' .. item
+    end
+  )
+  printerlib.lines(numberedContent)
 end
 
 return printerlib
