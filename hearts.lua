@@ -1,25 +1,10 @@
-local newGame = require "lib.game"
-local speech  = require "lib.speech"
-local cards   = require "lib.cards"
-local util    = require "lib.util"
-local layout  = require "lib.layout"
-local printer = require "lib.printer"
-local player  = require "lib.player"
-
-
-
--- heads up display
-local function render(game, player)
-  print('┌──────────────────────┐')
-  print('Hearts broken:', game.heartsBroken)
-  print('Trick: [ ' .. table.concat(game.trick, ' ') .. ' ]')
-  print(player.name .. "'s hand: [ " .. table.concat(player.hand, ', ') .. ' ]')
-  print(player.name .. ' may play the following cards:')
-  local playableCards = game:getPlayableCards(player.name)
-  for i, card in ipairs(playableCards) do
-    print('  ' .. i, cards.name(card))
-  end
-end
+local newGame   = require "lib.game"
+local speech    = require "lib.speech"
+local cards     = require "lib.cards"
+local util      = require "lib.util"
+local layout    = require "lib.layout"
+local printer   = require "lib.printer"
+local playerlib = require "lib.player"
 
 ---take turn
 local function yourTurn(game, player)
@@ -38,6 +23,22 @@ local function yourTurn(game, player)
   end
 end
 
+-- heads up display
+local function printHud(game)
+  local vessels = game:getVessels()
+  local you = vessels[1]
+  local handContent = playerlib.handContent(you)
+  print("YOUR HAND:")
+  printer.wrapping(handContent)
+  print()
+  print()
+  local playerStats = game:getAllPlayerStats()
+  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
+  print()
+  print()
+  print("It's your turn!")
+end
+
 ---prompt your player to continue
 ---@param message? string `(Press RETURN to ${message})`
 local function whenReady(message)
@@ -45,17 +46,6 @@ local function whenReady(message)
   io.write('(Press RETURN to ' .. doWhatever .. ')')
   _ = io.read()
   os.execute('clear')
-end
-
-local function printHandOfP(game)
-  local vessels = game:getVessels()
-  ---@type
-  local hands = util.map(
-    vessels,
-    function(vessel)
-      return
-    end
-  )
 end
 
 local function playGame()
@@ -67,22 +57,16 @@ local function playGame()
       :addPlayer('Noelle')
       :playAs('Kris')
       :dealAllCards()
-  local vessels = game:getVessels()
-  local you = vessels[1]
-  local handContent = player.handContent(you)
-  print("YOUR HAND:")
-  printer.wrapping(handContent)
-  print()
-  print()
-  local playerStats = game:getAllPlayerStats()
-  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
-  print()
-  print()
-  print("It's your turn!")
+  printHud(game)
 
-  -- yourTurn(game, game.players[1])
-  -- render(game, game.players[1])
-  -- printTableRecursive(game)
+  while not game:isOver() do
+    local player = game:getCurrentPlayer()
+    yourTurn(game, player)
+    whenReady('continue')
+    printHud(game)
+  end
+
+  print('Game over!')
 end
 
 playGame()

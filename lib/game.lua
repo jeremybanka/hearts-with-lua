@@ -18,6 +18,15 @@ gamelib.players = {}
 gamelib.trick = {}
 gamelib.turn = 1
 
+---check whether the game has ended
+---@param game gamelib
+---@return boolean
+function gamelib.isOver(game)
+  return util.every(game.players, function(player)
+    return #player.hand == 0
+  end)
+end
+
 ---deal a card to a player
 ---@param game gamelib
 ---@param player player

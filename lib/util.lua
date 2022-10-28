@@ -14,6 +14,19 @@ function util.some(values, doesMatch)
   return false
 end
 
+---port of Array.prototype.every from JavaScript
+---@generic Value
+---@param values Value[]
+---@param doesMatch fun(value: Value, index: integer, arr: any[]): boolean
+function util.every(values, doesMatch)
+  for i, v in ipairs(values) do
+    if not doesMatch(v, i, values) then
+      return false
+    end
+  end
+  return true
+end
+
 ---port of Array.prototype.indexOf from JavaScript
 ---@generic Value
 ---@param values Value[]
