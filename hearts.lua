@@ -9,7 +9,7 @@ _ = {}
 
 ---prompt your player to continue
 ---@param message? string `(Press RETURN to ${message})`
-local function whenReady(message)
+local function pressReturnTo(message)
   local doWhatever = message or 'continue'
   io.write('(Press RETURN ⏎ to ' .. doWhatever .. ')')
   _ = io.read()
@@ -41,14 +41,14 @@ end
 local function theirTurn(game, player)
   printHud(game)
   speech.say("It's " .. player.name .. "'s turn.")
-  whenReady()
+  pressReturnTo()
   local playableCards = game:getPlayableCards(player.name)
   local chosenCard = playableCards[1]
   game:playCard(player.name, chosenCard)
   printHud(game)
   print("* It's " .. player.name .. "'s turn.")
   speech.say(player.name .. " played " .. cards.name(chosenCard) .. "!")
-  whenReady()
+  pressReturnTo()
   game:endTurn()
 end
 
@@ -58,21 +58,18 @@ end
 ---@return nil
 local function yourTurn(game, player)
 
+  -- section 1
   printHud(game)
   speech.say("It's your turn!")
-  whenReady("choose a card to play")
+  pressReturnTo("choose a card to play")
 
-  local playableCards = game:getPlayableCards(player.name)
+  -- section 2
   printHud(game)
   print("* It's your turn!")
   speech.say('Enter a number to play a card: ')
-  local prettyPlayableCards = util.map(
-    playableCards,
-    function(card)
-      return cards.name(card)
-    end
-  )
-  printer.list(prettyPlayableCards, { indentFirstLine = 2, })
+  local playableCards = game:getPlayableCards(player.name)
+  local playableCardNames = util.map(playableCards, cards.name)
+  printer.list(playableCardNames, { indentFirstLine = 2, })
   print("(Press the number of the card you wish to play, then press RETURN ⏎)")
   io.write("> ")
   local cardIdx = io.read('*n')
@@ -80,25 +77,25 @@ local function yourTurn(game, player)
   game:playCard(player.name, chosenCard)
   _ = io.read() -- for some reason the program needs but ignores this line
 
+  -- section 3
   printHud(game)
   print("* It's your turn!")
   speech.say("You played " .. cards.name(chosenCard) .. ".")
-  whenReady()
+  pressReturnTo()
   game:endTurn()
 
 end
 
 local function playGame()
   os.execute('clear')
-  -- whenReady('start game')
+  pressReturnTo('start game')
   local game = newGame
       :addPlayer('Kris')
       :addPlayer('Susie')
       :addPlayer('Ralsei')
       :addPlayer('Noelle')
-      :playAs('Kris')
-      :dealAllCards()
-
+      :playAs('Noelle')
+      :startGame()
   while not game:isOver() do
     local player = game:getCurrentPlayer()
     if player then
@@ -109,7 +106,7 @@ local function playGame()
       end
     end
   end
-  print('Game over!')
+  game:endGame()
 end
 
 playGame()
