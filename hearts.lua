@@ -7,24 +7,6 @@ local narration = require "lib.narration"
 
 _ = {}
 
----their turn
----@param game gamelib
----@param player player
----@return nil
-local function theirTurn(game, player)
-  game:printHud()
-  speech.say("It's " .. player.name .. "'s turn.")
-  narration.pressReturnTo()
-  local playableCards = game:getPlayableCards(player.name)
-  local chosenCard = playableCards[1]
-  game:playCard(player.name, chosenCard)
-  game:printHud()
-  print("* It's " .. player.name .. "'s turn.")
-  speech.say(player.name .. " played " .. cards.name(chosenCard) .. "!")
-  narration.pressReturnTo()
-  game:endTurn()
-end
-
 ---prompt the player to play a card
 ---@param game gamelib
 ---@param player player
@@ -39,6 +21,17 @@ local function playCardPlease(game, player)
   local chosenCard = playableCards[cardIdx] or playableCards[1]
   game:playCard(player.name, chosenCard)
   _ = io.read() -- for some reason the program needs but also ignores this line
+end
+
+---a non-player character plays a card
+---@param game gamelib
+---@param player player
+---@return nil
+local function playCardNPC(game, player)
+  local playableCards = game:getPlayableCards(player.name)
+  local chosenCard = playableCards[1]
+  game:playCard(player.name, chosenCard)
+  narration.pressReturnTo("see what they play.")
 end
 
 ---describe card the player played
@@ -76,7 +69,25 @@ local function yourTurn(game, player)
   }
   narration.narrate(game, player, narrative)
   game:endTurn()
+end
 
+---their turn
+---@param game gamelib
+---@param player player
+---@return nil
+local function theirTurn(game, player)
+  ---@type NarrativeBeat[]
+  local narrative = {
+    {
+      description = "It's " .. player.name .. "'s turn!",
+      instruction = playCardNPC
+    },
+    {
+      description = describeCardPlayed,
+    },
+  }
+  narration.narrate(game, player, narrative)
+  game:endTurn()
 end
 
 local function playGame()
@@ -87,7 +98,7 @@ local function playGame()
       :addPlayer('Susie')
       :addPlayer('Ralsei')
       :addPlayer('Noelle')
-      :playAs('Noelle')
+      :playAs('Ralsei')
       :startGame()
   while not game:isOver() do
     local player = game:getCurrentPlayer()
