@@ -30,30 +30,30 @@ function gamelib.isOver(game)
   end) and #util.entries(game.trick) == 0
 end
 
----end game and calculate scores
+---end game and calculate final points
 ---@param game gamelib
 ---@return nil
 function gamelib.endGame(game)
-  if (util.some(game.players, function(player) return player.score == 26 end)) then
+  if (util.some(game.players, function(player) return player.points == 26 end)) then
     for _, player in pairs(game.players) do
-      if (player.score == 26) then
-        player.score = 0
+      if (player.points == 26) then
+        player.points = 0
       else
-        player.score = 26
+        player.points = 26
       end
     end
   end
   local winner = util.reduce(game.players, function(acc, player)
-    if (player.score < acc.score) then
+    if (player.points < acc.points) then
       return player
     else
       return acc
     end
   end, game.players[1])
   print(winner.name .. " wins!")
-  print("SCORES:")
+  print("FINAL POINTS:")
   for _, player in pairs(game.players) do
-    print(player.name .. ": " .. player.score)
+    print(player.name .. ": " .. player.points)
   end
 end
 
@@ -289,12 +289,12 @@ end
 ---hearts: get points for trick
 ---@param game gamelib
 ---@return integer
-function gamelib.getTrickScore(game)
-  local score = 0
+function gamelib.getTrickPoints(game)
+  local points = 0
   for _, card in pairs(game.trick) do
-    score = score + cards.getPoints(card)
+    points = points + cards.getPoints(card)
   end
-  return score
+  return points
 end
 
 ---end round
@@ -304,7 +304,7 @@ function gamelib.endRound(game)
   local trickTaker = game:getTrickTaker()
   if trickTaker then
     table.insert(trickTaker.tricksTaken, game.trick)
-    trickTaker.score = trickTaker.score + game:getTrickScore()
+    trickTaker.points = trickTaker.points + game:getTrickPoints()
   end
   game.round = game.round + 1
   game.turn = util.indexOf(game.players, trickTaker)
@@ -363,7 +363,7 @@ function gamelib.getPlayerStats(game, player)
   table.insert(summary, player.name)
   table.insert(summary, trickCard)
   table.insert(summary, "tricks: " .. #player.tricksTaken)
-  table.insert(summary, "score: " .. player.score)
+  table.insert(summary, "points: " .. player.points)
   for _, trick in ipairs(player.tricksTaken) do
     table.insert(summary, table.concat(trick, ", "))
   end

@@ -42,10 +42,10 @@ function lib.getNumericRank(card)
   end
 end
 
----hearts: get score of card
+---hearts: get points for card
 ---@param card string
 ---@return integer
-function lib.getScore(card)
+function lib.getPoints(card)
   -- hearts are worth 1 point
   if card:sub(-1) == 'H' then
     return 1

@@ -14,13 +14,13 @@ function playerlib.new(playerName)
   ---@field name string
   ---@field hand string[]
   ---@field tricksTaken string[][]
-  ---@field score integer
+  ---@field points integer
   ---@field isVessel boolean
   local player = {
     name = playerName,
     hand = {},
     tricksTaken = {},
-    score = 0,
+    points = 0,
     isVessel = false
   }
 
