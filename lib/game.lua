@@ -3,6 +3,7 @@ local playerlib = require "lib.player"
 local util      = require "lib.util"
 local cards     = require "lib.cards"
 local printer   = require "lib.printer"
+local narration = require "lib.narration"
 
 ---@class gamelib : table A library of functions for a card game.
 ---@field deck string[]
@@ -12,6 +13,7 @@ local printer   = require "lib.printer"
 ---@field players player[]
 ---@field turn integer
 ---@field round integer
+---@field narrative NarrativeBeat[]
 local gamelib = {}
 
 gamelib.deck = deck.shuffle(deck.create())
@@ -261,9 +263,13 @@ end
 
 ---get the player whose turn it is
 ---@param game gamelib
----@return player?
+---@return player
 function gamelib.getCurrentPlayer(game)
-  return game.players[game.turn]
+  local currentPlayer = game.players[game.turn]
+  if not currentPlayer then
+    error("No current player.")
+  end
+  return currentPlayer
 end
 
 ---pass turn to a player
@@ -406,6 +412,26 @@ function gamelib.getAllPlayerStats(game)
 
   local stats = util.map(game.players, statsOf)
   return stats
+end
+
+---ingest narrative
+---@param game gamelib
+---@param narrative NarrativeBeat[]
+---@return gamelib
+function gamelib.narrate(game, narrative)
+  game.narrative = narrative
+  narration.narrate(game, narrative)
+  game.narrative = {}
+  return game
+end
+
+---interrupt narrative
+---@param game gamelib
+---@param digression NarrativeBeat[]
+---@return gamelib
+function gamelib.interruptNarrative(game, digression)
+  narration.narrate(game, digression)
+  return game
 end
 
 return gamelib

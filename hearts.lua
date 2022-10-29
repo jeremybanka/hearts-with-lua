@@ -9,9 +9,9 @@ _ = {}
 
 ---prompt the player to play a card
 ---@param game gamelib
----@param player player
 ---@return nil
-local function playCardPlease(game, player)
+local function playCardPlease(game)
+  local player = game:getCurrentPlayer()
   local playableCards = game:getPlayableCards(player.name)
   local playableCardNames = util.map(playableCards, cards.name)
   printer.list(playableCardNames, { indentFirstLine = 2, })
@@ -25,9 +25,9 @@ end
 
 ---a non-player character plays a card
 ---@param game gamelib
----@param player player
 ---@return nil
-local function playCardNPC(game, player)
+local function playCardNPC(game)
+  local player = game:getCurrentPlayer()
   local playableCards = game:getPlayableCards(player.name)
   local chosenCard = playableCards[1]
   game:playCard(player.name, chosenCard)
@@ -36,13 +36,17 @@ end
 
 ---describe card the player played
 ---@param game gamelib
----@param player player
 ---@return string
-local function describeCardPlayed(game, player)
+local function describeCardPlayed(game)
+  local player = game:getCurrentPlayer()
   local lastPlayedCard = game:getCardPlayedThisTurn()
+  local subject = player.name
+  if player.isVessel then
+    subject = "You"
+  end
   if lastPlayedCard then
     local lastPlayedCardName = cards.name(lastPlayedCard)
-    return player.name .. " played " .. lastPlayedCardName .. "!"
+    return subject .. " played " .. lastPlayedCardName .. "!"
   else
     return "But nobody played a card..."
   end
@@ -60,15 +64,15 @@ local function yourTurn(game, player)
       instruction = "choose a card to play"
     },
     {
-      description = 'Enter a number to play a card:',
+      description = "Enter a number to play a card:",
       instruction = playCardPlease
     },
     {
       description = describeCardPlayed,
     },
   }
-  narration.narrate(game, player, narrative)
-  game:endTurn()
+  game:narrate(narrative)
+      :endTurn()
 end
 
 ---their turn
@@ -86,8 +90,8 @@ local function theirTurn(game, player)
       description = describeCardPlayed,
     },
   }
-  narration.narrate(game, player, narrative)
-  game:endTurn()
+  game:narrate(narrative)
+      :endTurn()
 end
 
 local function playGame()
