@@ -52,15 +52,15 @@ local function theirTurn(game, player)
   game:endTurn()
 end
 
----@class Beat : table
----@field desc (fun(game: gamelib, player: player): string) | string
----@field prompt (fun(game: gamelib, player: player): nil) | string | nil
+---@class NarrativeBeat : table
+---@field description (fun(game: gamelib, player: player): string) | string
+---@field instruction (fun(game: gamelib, player: player): nil) | string | nil
 
 ---prompt the player to play a card
 ---@param game gamelib
 ---@param player player
 ---@return nil
-local function promptCard(game, player)
+local function playCardPlease(game, player)
   local playableCards = game:getPlayableCards(player.name)
   local playableCardNames = util.map(playableCards, cards.name)
   printer.list(playableCardNames, { indentFirstLine = 2, })
@@ -91,67 +91,57 @@ end
 ---@param player player
 ---@return nil
 local function yourTurn(game, player)
-  ---@type Beat[]
+  ---@type NarrativeBeat[]
   local narrative = {
     {
-      desc = "It's your turn!",
-      prompt = "choose a card to play"
+      description = "It's your turn!",
+      instruction = "choose a card to play"
     },
     {
-      desc = 'Enter a number to play a card:',
-      prompt = promptCard
+      description = 'Enter a number to play a card:',
+      instruction = playCardPlease
     },
     {
-      desc = describeCardPlayed,
+      description = describeCardPlayed,
     },
   }
 
-  -- section 1
-  printHud(game)
-  local desc1 = narrative[1].desc
-  if type(desc1) == 'function' then
-    desc1 = desc1(game, player)
-  end
-  speech.say(desc1)
-  local prompt = narrative[1].prompt
-  if type(prompt) == 'function' then
-    prompt(game, player)
-  else
-    pressReturnTo(prompt)
+  ---normalize description to string
+  ---@param description (fun(game: gamelib, player: player): string) | string
+  ---@return string
+  local function normalizeDescription(description)
+    if type(description) == 'function' then
+      description = description(game, player)
+    end
+    return description
   end
 
-  -- section 2
-  printHud(game)
-  local desc2 = narrative[2].desc
-  if type(desc2) == 'function' then
-    desc2 = desc2(game, player)
-  end
-  print("* " .. desc1)
-  speech.say(desc2)
-  local prompt = narrative[2].prompt
-  if type(prompt) == 'function' then
-    prompt(game, player)
-  else
-    pressReturnTo(prompt)
+  ---prompt the player using the instruction
+  ---@param instruction (fun(game: gamelib, player: player): nil) | string | nil
+  ---@return nil
+  local function prompt(instruction)
+    if type(instruction) == 'function' then
+      instruction(game, player)
+    else
+      pressReturnTo(instruction)
+    end
   end
 
-  -- section 3
-  printHud(game)
-  local desc3 = narrative[3].desc
-  if type(desc3) == 'function' then
-    desc3 = desc3(game, player)
+  local beat = 0
+  while beat < #narrative do
+    printHud(game)
+    beat = beat + 1
+    for i = 1, beat do
+      local description = normalizeDescription(narrative[i].description)
+      if i < beat then
+        print("* " .. description)
+      else
+        speech.say(description)
+      end
+    end
+    prompt(narrative[beat].instruction)
+    game:endTurn()
   end
-  print("* " .. desc1)
-  print("* " .. desc2)
-  speech.say(desc3)
-  local prompt = narrative[3].prompt
-  if type(prompt) == 'function' then
-    prompt(game, player)
-  else
-    pressReturnTo(prompt)
-  end
-
-  game:endTurn()
 end
 
 local function playGame()
