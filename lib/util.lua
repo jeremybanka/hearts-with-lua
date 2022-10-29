@@ -78,6 +78,20 @@ function util.map(values, transform)
   return result
 end
 
+---port of Array.prototype.reduce from JavaScript
+---@generic Value, Accumulator
+---@param values Value[]
+---@param reducer fun(acc: Accumulator, value: Value, index: integer, arr: Value[]): Accumulator
+---@param initial? Accumulator
+---@return Accumulator
+function util.reduce(values, reducer, initial)
+  local acc = initial
+  for i, v in ipairs(values) do
+    acc = reducer(acc, v, i, values)
+  end
+  return acc
+end
+
 ---@class entry<V>: { key: string; val: V }
 
 ---port of Object.entries from JavaScript
