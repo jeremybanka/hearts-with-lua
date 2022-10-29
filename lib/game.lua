@@ -220,6 +220,15 @@ function gamelib.playCard(game, playerName, card)
   return game
 end
 
+---get card played this turn
+---@param game gamelib
+---@return string?
+function gamelib.getCardPlayedThisTurn(game)
+  local currentPlayer = game.players[game.turn]
+  local lastPlayedCard = game.trick[currentPlayer.name]
+  return lastPlayedCard
+end
+
 ---get characters who are controlled by the player
 ---@param game gamelib
 ---@return player[]
