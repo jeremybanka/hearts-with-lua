@@ -26,8 +26,35 @@ gamelib.round = 1
 ---@return boolean
 function gamelib.isOver(game)
   return util.every(game.players, function(player)
-    return #player.hand == 0 and #util.entries(game.trick) == 0
-  end)
+    return #player.hand == 0
+  end) and #util.entries(game.trick) == 0
+end
+
+---end game and calculate scores
+---@param game gamelib
+---@return nil
+function gamelib.endGame(game)
+  if (util.some(game.players, function(player) return player.score == 26 end)) then
+    for _, player in pairs(game.players) do
+      if (player.score == 26) then
+        player.score = 0
+      else
+        player.score = 26
+      end
+    end
+  end
+  local winner = util.reduce(game.players, function(acc, player)
+    if (player.score < acc.score) then
+      return player
+    else
+      return acc
+    end
+  end, game.players[1])
+  print(winner.name .. " wins!")
+  print("SCORES:")
+  for _, player in pairs(game.players) do
+    print(player.name .. ": " .. player.score)
+  end
 end
 
 ---deal a card to a player
@@ -44,18 +71,39 @@ end
 ---@return gamelib
 function gamelib.dealOneToEachPlayer(game)
   for _, player in ipairs(game.players) do
-    gamelib.dealCard(game, player)
+    game:dealCard(player)
   end
   return game
 end
 
----deal out cards evenly to the players, leaving extras in the deck
+---deal out all cards evenly to the players, leaving extras in the deck
 ---@param game gamelib
 ---@return gamelib
 function gamelib.dealAllCards(game)
   while #game.deck >= #game.players do
-    gamelib.dealOneToEachPlayer(game)
+    game:dealOneToEachPlayer()
   end
+  return game
+end
+
+---get player with the two of clubs
+---@param game gamelib
+---@return player?
+function gamelib.getStartingPlayer(game)
+  for _, player in ipairs(game.players) do
+    if util.contains(player.hand, '2C') then
+      return player
+    end
+  end
+end
+
+---start game
+---@param game gamelib
+---@return gamelib
+function gamelib.startGame(game)
+  game:dealAllCards()
+  local startingPlayer = game:getStartingPlayer()
+  game.turn = util.indexOf(game.players, startingPlayer)
   return game
 end
 
@@ -106,11 +154,10 @@ function gamelib.getPlayableCards(game, playerName)
 
   local trickEntries = util.entries(game.trick)
   -- util.log(trickEntries )
-  local leadingSuit = #trickEntries > 0 and trickEntries[1].val:sub(-1) or nil
   local playerMustFollowSuit = util.some(
     player.hand,
     function(card)
-      return card:sub(-1) == leadingSuit
+      return card:sub(-1) == game.leadingSuit
     end
   )
   local playerHasOnlyHearts = not util.some(
@@ -128,16 +175,15 @@ function gamelib.getPlayableCards(game, playerName)
     local suit = card:sub(-1)
 
     if #trickEntries == 0 then
-      -- print("#trickEntries", #trickEntries)
-      -- print("suit ~= 'H'", suit ~= 'H')
-      -- print("game.heartsBroken", game.heartsBroken)
-      -- print("playerHasOnlyHearts", playerHasOnlyHearts)
+      if game.round == 1 then
+        return { '2C' }
+      end
       if suit ~= 'H' or game.heartsBroken or playerHasOnlyHearts then
         table.insert(playableCards, card)
       end
     else
       if playerMustFollowSuit then
-        if suit == leadingSuit then
+        if suit == game.leadingSuit then
           table.insert(playableCards, card)
         end
       elseif suit ~= 'H' or heartsMayBeBroken then
@@ -172,17 +218,6 @@ function gamelib.playCard(game, playerName, card)
   player:loseCard(card)
   game.trick[playerName] = card
   return game
-end
-
----get player with the two of clubs
----@param game gamelib
----@return player?
-function gamelib.getVessel(game)
-  for _, player in ipairs(game.players) do
-    if util.contains(player.hand, '2C') then
-      return player
-    end
-  end
 end
 
 ---get characters who are controlled by the player
@@ -232,33 +267,32 @@ end
 ---check who won the trick
 ---@param game gamelib
 ---@return player?
-function gamelib.getTrickWinner(game)
+function gamelib.getTrickTaker(game)
   local trickEntries = util.entries(game.trick)
-  local leadingSuit = trickEntries[1].val:sub(-1)
-  local winner = trickEntries[1].key
-  local winnerCard = trickEntries[1].val
+  local takersName = trickEntries[1].key
+  local takersCard = trickEntries[1].val
   for _, entry in ipairs(trickEntries) do
     local card = entry.val
     local suit = card:sub(-1)
-    if suit == leadingSuit then
+    if suit == game.leadingSuit then
       local numRank = cards.getNumericRank(card)
-      local numRankW = cards.getNumericRank(winnerCard)
+      local numRankW = cards.getNumericRank(takersCard)
       if numRank > numRankW then
-        winner = entry.key
-        winnerCard = card
+        takersName = entry.key
+        takersCard = card
       end
     end
   end
-  return game:getPlayer(winner)
+  return game:getPlayer(takersName)
 end
 
----hearts: get score of trick
+---hearts: get points for trick
 ---@param game gamelib
----@return number
+---@return integer
 function gamelib.getTrickScore(game)
   local score = 0
   for _, card in pairs(game.trick) do
-    score = score + cards.getScore(card)
+    score = score + cards.getPoints(card)
   end
   return score
 end
@@ -267,13 +301,13 @@ end
 ---@param game gamelib
 ---@return gamelib
 function gamelib.endRound(game)
-  local trickWinner = gamelib.getTrickWinner(game)
-  if trickWinner then
-    table.insert(trickWinner.tricksTaken, game.trick)
-    trickWinner.score = trickWinner.score + game:getTrickScore()
+  local trickTaker = game:getTrickTaker()
+  if trickTaker then
+    table.insert(trickTaker.tricksTaken, game.trick)
+    trickTaker.score = trickTaker.score + game:getTrickScore()
   end
   game.round = game.round + 1
-  game.turn = util.indexOf(game.players, trickWinner)
+  game.turn = util.indexOf(game.players, trickTaker)
   game.trick = {}
   game.leadingSuit = nil
   return game
