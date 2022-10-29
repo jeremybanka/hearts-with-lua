@@ -2,6 +2,7 @@ local deck      = require "lib.deck"
 local playerlib = require "lib.player"
 local util      = require "lib.util"
 local cards     = require "lib.cards"
+local printer   = require "lib.printer"
 
 ---@class gamelib : table A library of functions for a card game.
 ---@field deck string[]
@@ -55,6 +56,25 @@ function gamelib.endGame(game)
   for _, player in pairs(game.players) do
     print(player.name .. ": " .. player.points)
   end
+end
+
+---heads up display
+---@param game gamelib
+---@return nil
+function gamelib.printHud(game)
+  os.execute('clear')
+  local vessels = game:getVessels()
+  for _, vessel in ipairs(vessels) do
+    local handContent = vessel:readHand()
+    print("YOUR HAND (" .. vessel.name .. ")")
+    printer.wrapping(handContent)
+    print()
+    print()
+  end
+  local playerStats = game:getAllPlayerStats()
+  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
+  print()
+  print()
 end
 
 ---deal a card to a player

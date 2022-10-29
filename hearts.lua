@@ -3,58 +3,27 @@ local speech    = require "lib.speech"
 local cards     = require "lib.cards"
 local util      = require "lib.util"
 local printer   = require "lib.printer"
-local playerlib = require "lib.player"
+local narration = require "lib.narration"
 
 _ = {}
-
----prompt your player to continue
----@param message? string `(Press RETURN to ${message})`
-local function pressReturnTo(message)
-  local doWhatever = message or 'continue'
-  io.write('(Press RETURN ⏎ to ' .. doWhatever .. ')')
-  _ = io.read()
-end
-
----heads up display
----@param game gamelib
----@return nil
-local function printHud(game)
-  os.execute('clear')
-  local vessels = game:getVessels()
-  for _, vessel in ipairs(vessels) do
-    local handContent = vessel:readHand()
-    print("YOUR HAND (" .. vessel.name .. ")")
-    printer.wrapping(handContent)
-    print()
-    print()
-  end
-  local playerStats = game:getAllPlayerStats()
-  printer.tabular(playerStats, { cellSize = 16, orientation = 'horizontal' })
-  print()
-  print()
-end
 
 ---their turn
 ---@param game gamelib
 ---@param player player
 ---@return nil
 local function theirTurn(game, player)
-  printHud(game)
+  game:printHud()
   speech.say("It's " .. player.name .. "'s turn.")
-  pressReturnTo()
+  narration.pressReturnTo()
   local playableCards = game:getPlayableCards(player.name)
   local chosenCard = playableCards[1]
   game:playCard(player.name, chosenCard)
-  printHud(game)
+  game:printHud()
   print("* It's " .. player.name .. "'s turn.")
   speech.say(player.name .. " played " .. cards.name(chosenCard) .. "!")
-  pressReturnTo()
+  narration.pressReturnTo()
   game:endTurn()
 end
-
----@class NarrativeBeat : table
----@field description (fun(game: gamelib, player: player): string) | string
----@field instruction (fun(game: gamelib, player: player): nil) | string | nil
 
 ---prompt the player to play a card
 ---@param game gamelib
@@ -105,48 +74,14 @@ local function yourTurn(game, player)
       description = describeCardPlayed,
     },
   }
+  narration.narrate(game, player, narrative)
+  game:endTurn()
 
-  ---normalize description to string
-  ---@param description (fun(game: gamelib, player: player): string) | string
-  ---@return string
-  local function normalizeDescription(description)
-    if type(description) == 'function' then
-      description = description(game, player)
-    end
-    return description
-  end
-
-  ---prompt the player using the instruction
-  ---@param instruction (fun(game: gamelib, player: player): nil) | string | nil
-  ---@return nil
-  local function prompt(instruction)
-    if type(instruction) == 'function' then
-      instruction(game, player)
-    else
-      pressReturnTo(instruction)
-    end
-  end
-
-  local beat = 0
-  while beat < #narrative do
-    printHud(game)
-    beat = beat + 1
-    for i = 1, beat do
-      local description = normalizeDescription(narrative[i].description)
-      if i < beat then
-        print("* " .. description)
-      else
-        speech.say(description)
-      end
-    end
-    prompt(narrative[beat].instruction)
-    game:endTurn()
-  end
 end
 
 local function playGame()
   os.execute('clear')
-  pressReturnTo('start game')
+  narration.pressReturnTo('start game')
   local game = newGame
       :addPlayer('Kris')
       :addPlayer('Susie')
