@@ -7,9 +7,6 @@ local layout = {}
 ---@param text string
 ---@return string
 function layout.cell(size, text)
-  -- print("text", text:sub(-3))
-  -- print("len", text:len())
-  -- print("bytes", text:byte())
   local lastThree = text:sub(-3)
   local suitCharacters = {
     '♠', '♥', '♦', '♣'

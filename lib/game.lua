@@ -187,9 +187,6 @@ function gamelib.getPlayableCards(game, playerName)
     end
   )
   local heartsMayBeBroken = playerHasOnlyHearts or game.round ~= 1
-  -- print('heartsMayBeBroken', heartsMayBeBroken)
-  -- print('playerMustFollowSuit', playerMustFollowSuit)
-  -- print('leadingSuit', leadingSuit)
 
   for _, card in ipairs(player.hand) do
     local suit = card:sub(-1)
