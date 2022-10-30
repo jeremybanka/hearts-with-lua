@@ -13,7 +13,7 @@ function playerlib.new(playerName)
   ---@class player : table
   ---@field name string
   ---@field hand string[]
-  ---@field tricksTaken string[][]
+  ---@field tricksTaken table<string, string>[]
   ---@field points integer
   ---@field isVessel boolean
   local player = {
@@ -25,11 +25,11 @@ function playerlib.new(playerName)
   }
 
   ---get a player's hand as printable content
-  ---@param player player
+  ---@param p player
   ---@return string[] paragraphs
-  function player.readHand(player)
+  function player.readHand(p)
     return util.map(
-      player.hand,
+      p.hand,
       function(card)
         local cardName = cards.name(card)
         local cellSize = 8
@@ -40,13 +40,13 @@ function playerlib.new(playerName)
   end
 
   ---player loses a card
-  ---@param player player
+  ---@param p player
   ---@param card string
   ---@return player
-  function player.loseCard(player, card)
-    local cardIdxInHand = util.indexOf(player.hand, card)
-    table.remove(player.hand, cardIdxInHand)
-    return player
+  function player.loseCard(p, card)
+    local cardIdxInHand = util.indexOf(p.hand, card)
+    table.remove(p.hand, cardIdxInHand)
+    return p
   end
 
   return player
