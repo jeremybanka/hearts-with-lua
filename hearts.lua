@@ -4,6 +4,7 @@ local cards     = require "lib.cards"
 local util      = require "lib.util"
 local printer   = require "lib.printer"
 local narration = require "lib.narration"
+local strategy  = require "lib.SECRET.strategy"
 
 _ = {}
 
@@ -28,8 +29,8 @@ end
 ---@return nil
 local function playCardNPC(game)
   local player = game:getCurrentPlayer()
-  local playableCards = game:getPlayableCards(player.name)
-  local chosenCard = playableCards[1]
+  local strat = strategy[player.name] or strategy.none
+  local chosenCard = strat(game, player.name)
   game:playCard(player.name, chosenCard)
   narration.pressReturnTo("see what they play.")
 end
@@ -102,6 +103,7 @@ local function playGame()
       :addPlayer('Susie')
       :addPlayer('Ralsei')
       :addPlayer('Noelle')
+      -- any set of 4 players can be used
       :playAs('Kris')
       -- :playAs('Susie')
       -- :playAs('Ralsei')
