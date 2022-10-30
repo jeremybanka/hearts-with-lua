@@ -4,6 +4,7 @@ local util      = require "lib.util"
 local cards     = require "lib.cards"
 local printer   = require "lib.printer"
 local narration = require "lib.narration"
+local egg       = require "lib.SECRET.SPOILER_ALERT.PROCEED_AT_YUOR_OWN_RISK.egg"
 
 ---@class gamelib : table A library of functions for a card game.
 ---@field deck string[]
@@ -14,6 +15,7 @@ local narration = require "lib.narration"
 ---@field turn integer
 ---@field round integer
 ---@field narrative NarrativeBeat[]
+---@field narrativeMarker integer
 local gamelib = {}
 
 gamelib.deck = deck.shuffle(deck.create())
@@ -23,6 +25,8 @@ gamelib.players = {}
 gamelib.trick = {}
 gamelib.turn = 1
 gamelib.round = 1
+gamelib.narrative = {}
+gamelib.narrativeMarker = 1
 
 ---check whether the game has ended
 ---@param game gamelib
@@ -113,7 +117,7 @@ end
 ---@return player?
 function gamelib.getStartingPlayer(game)
   for _, player in ipairs(game.players) do
-    if util.contains(player.hand, '2C') then
+    if util.contains(player.hand, 'JS') then
       return player
     end
   end
@@ -195,7 +199,7 @@ function gamelib.getPlayableCards(game, playerName)
 
     if #trickEntries == 0 then
       if game.round == 1 then
-        return { '2C' }
+        return { 'JS' }
       end
       if suit ~= 'H' or game.heartsBroken or playerHasOnlyHearts then
         table.insert(playableCards, card)
@@ -236,6 +240,9 @@ function gamelib.playCard(game, playerName, card)
   end
   player:loseCard(card)
   game.trick[playerName] = card
+  if (cards.name(card) == "LANCER") then
+    egg.lancerPlayed(game)
+  end
   return game
 end
 
@@ -422,15 +429,22 @@ function gamelib.narrate(game, narrative)
   game.narrative = narrative
   narration.narrate(game, narrative)
   game.narrative = {}
+  game.narrativeMarker = 0
   return game
 end
 
 ---interrupt narrative
 ---@param game gamelib
 ---@param digression NarrativeBeat[]
+---@param when? integer
 ---@return gamelib
-function gamelib.interruptNarrative(game, digression)
-  narration.narrate(game, digression)
+function gamelib.interruptNarrative(game, digression, when)
+  local marker = game.narrativeMarker + (when or 1)
+  for _, beat in ipairs(digression) do
+    table.insert(game.narrative, marker, beat)
+    marker = marker + 1
+  end
+
   return game
 end
 

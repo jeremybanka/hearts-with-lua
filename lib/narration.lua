@@ -41,19 +41,19 @@ function narrationlib.narrate(game, narrative)
     end
   end
 
-  local beat = 0
-  while beat < #narrative do
+  -- local beat = 0
+  while game.narrativeMarker < #narrative do
     game:printHud()
-    beat = beat + 1
-    for i = 1, beat do
+    game.narrativeMarker = game.narrativeMarker + 1
+    for i = 1, game.narrativeMarker do
       local description = normalizeDescription(narrative[i].description)
-      if i < beat then
+      if i < game.narrativeMarker then
         print("* " .. description)
       else
         speech.say(description)
       end
     end
-    prompt(narrative[beat].instruction)
+    prompt(narrative[game.narrativeMarker].instruction)
   end
 end
 
