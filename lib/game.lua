@@ -70,6 +70,11 @@ end
 function gamelib.printHud(game)
   os.execute('clear')
   local vessels = game:getVessels()
+  ---you can debug the strategy of an npc by uncommenting the following line
+  -- table.insert(vessels, game:getPlayer("Noelle"))
+  ---you can visualize the upcoming narrative by uncommenting the following line
+  -- util.log(game.narrative)
+  -- util.log(game.narrativeMarker)
   for _, vessel in ipairs(vessels) do
     local handContent = vessel:readHand()
     print("YOUR HAND (" .. vessel.name .. ")")
@@ -380,14 +385,9 @@ function gamelib.getPlayerStats(game, player)
   local summary = {}
   local playerIsCurrent = game:getCurrentPlayer() == player
   local markers = ""
-  ---if it's the player's turn, mark it
   if playerIsCurrent then
     markers = markers .. "*"
   end
-  ---if the player is a vessel, mark it
-  -- if player.isVessel then
-  --   markers = markers .. "(you)"
-  -- end
   local trickCard = nil
   local trickFallback = ""
   if (playerIsCurrent) then
@@ -441,6 +441,8 @@ end
 ---@return gamelib
 function gamelib.interruptNarrative(game, digression, when)
   local marker = game.narrativeMarker + (when or 1)
+  -- uncomment to debug interruptions
+  -- print("interrupting narrative at marker " .. marker)
   for _, beat in ipairs(digression) do
     table.insert(game.narrative, marker, beat)
     marker = marker + 1
