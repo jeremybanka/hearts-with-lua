@@ -26,7 +26,7 @@ gamelib.trick = {}
 gamelib.turn = 1
 gamelib.round = 1
 gamelib.narrative = {}
-gamelib.narrativeMarker = 1
+gamelib.narrativeMarker = 0
 
 ---check whether the game has ended
 ---@param game gamelib
@@ -146,13 +146,14 @@ end
 ---get a player in the game
 ---@param game gamelib
 ---@param playerName string
----@return player?
+---@return player
 function gamelib.getPlayer(game, playerName)
   for _, player in ipairs(game.players) do
     if player.name == playerName then
       return player
     end
   end
+  error("Player " .. playerName .. " not found.")
 end
 
 ---play as a player
