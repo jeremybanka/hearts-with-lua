@@ -42,6 +42,85 @@ function lib.getNumericRank(card)
   end
 end
 
+---get lowest ranked from a list of cards
+---@param cards string[]
+---@return string[]
+function lib.getLowestRank(cards)
+  local lowestRank = 15
+  local lowestCards = {}
+  for _, card in ipairs(cards) do
+    local rank = lib.getNumericRank(card)
+    if rank == lowestRank then
+      table.insert(lowestCards, card)
+    end
+    if rank < lowestRank then
+      lowestRank = rank
+      lowestCards = { card }
+    end
+  end
+  return lowestCards
+end
+
+---get highest ranked from a list of cards
+---@param cards string[]
+---@return string[]
+function lib.getHighestRank(cards)
+  local highestRank = 0
+  local highestCards = {}
+  for _, card in ipairs(cards) do
+    local rank = lib.getNumericRank(card)
+    if rank == highestRank then
+      table.insert(highestCards, card)
+    end
+    if rank > highestRank then
+      highestRank = rank
+      highestCards = { card }
+    end
+  end
+  return highestCards
+end
+
+---get second highest ranked from a list of cards
+---@param cards string[]
+---@return string[]
+function lib.getSecondHighestRank(cards)
+  local highestRank = 0
+  local highestRankCards = {}
+  local secondHighestRank = 0
+  local secondHighestCards = {}
+  for _, card in ipairs(cards) do
+    local rank = lib.getNumericRank(card)
+    if rank == highestRank then
+      table.insert(highestRankCards, card)
+    elseif rank > highestRank then
+      secondHighestRank = highestRank
+      secondHighestCards = highestRankCards
+      highestRank = rank
+      highestRankCards = { card }
+    elseif rank == secondHighestRank then
+      table.insert(secondHighestCards, card)
+    elseif rank > secondHighestRank then
+      secondHighestRank = rank
+      secondHighestCards = { card }
+    end
+  end
+  return secondHighestCards
+end
+
+---filter to cards with a certain suit
+---@param cards string[]
+---@param suit string
+---@return string[]
+function lib.filterSuit(cards, suit)
+  local filtered = {}
+  for _, card in ipairs(cards) do
+    if card:sub(-1) == suit then
+      table.insert(filtered, card)
+    end
+  end
+  return filtered
+end
+
 ---hearts: get points for card
 ---@param card string
 ---@return integer
