@@ -27,10 +27,16 @@ function egg.lancerPlayed(game)
     } },
     Noelle = { {
       speaker = "Noelle",
-      description = "Fahaha! Have we met?",
+      description = "Fahaha! I got dancered! XD",
+    }, {
+      speaker = "Noelle",
+      description = "Wait, have we met?"
     }, {
       speaker = "Lancer",
-      description = "I'm Lancer, and I'm here to say, I'm gonna Lancer you today!",
+      description = "My name is Lancer, and I'm here to say, I'm gonna Lancer, you!",
+    }, {
+      speaker = "Lancer",
+      description = "Today!",
     } }
   }
   local player = game:getCurrentPlayer()
