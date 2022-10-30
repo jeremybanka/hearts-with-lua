@@ -1,5 +1,4 @@
 local newGame   = require "lib.game"
-local speech    = require "lib.speech"
 local cards     = require "lib.cards"
 local util      = require "lib.util"
 local printer   = require "lib.printer"

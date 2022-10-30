@@ -1,7 +1,29 @@
 local util = require "lib.util"
 local layout = require "lib.layout"
+
 ---@class printerlib : table A library of printing macros.
 local printerlib = {}
+
+---print line with asterisk, character by character
+---@param line string
+---@param speed? number
+---@return nil
+function printerlib.say(line, speed)
+  io.write('* ')
+  for i = 1, #line do
+    io.write(line:sub(i, i))
+    io.flush()
+    os.execute('sleep ' .. (speed or 0.005))
+  end
+  print()
+end
+
+-- print line with asterisk
+---@param line string
+---@return nil
+function printerlib.said(line)
+  print('* ' .. line)
+end
 
 ---print an array of lines
 ---@param lines string[]

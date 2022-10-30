@@ -1,4 +1,4 @@
-local speech = require "lib.speech"
+local printer = require "lib.printer"
 
 ---@class NarrativeBeat : table
 ---@field speaker? string
@@ -54,12 +54,12 @@ function narrationlib.narrate(game, narrative)
         if speaker ~= "" then
           print(speaker .. ": ")
         end
-        print("* " .. description)
+        printer.said(description)
       else
         if speaker ~= "" then
           print(speaker .. ": ")
         end
-        speech.say(description)
+        printer.say(description)
       end
     end
     prompt(narrative[game.narrativeMarker].instruction)
