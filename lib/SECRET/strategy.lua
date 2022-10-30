@@ -106,6 +106,7 @@ function strategylib.Ralsei(game, playerName)
 end
 
 ---fight or flight: noelle assesses the threat of points
+--- [LMAO] (I Made Her Brain A Robot One LOL)
 ---@param game gamelib
 ---@param playerName string
 ---@return integer
@@ -164,11 +165,11 @@ function strategylib.Noelle(game, playerName)
   local playerMustFollowSuit = util.some(
     player.hand,
     function(card)
-      return card:sub(-1) == game.leadingSuit
+      return cards.getSuit(card) == game.leadingSuit
     end
   )
-  print(threat)
-  util.log(playableCards)
+  -- print(threat)
+  -- util.log(playableCards)
   local lowestCards = cards.getLowestRank(playableCards)
   local highestCards = cards.getHighestRank(playableCards)
 
@@ -224,7 +225,7 @@ function strategylib.Noelle(game, playerName)
   local highestSafeCard = util.filter(
     highestCards,
     function(card)
-      return not util.contains({ 'QS', 'KS', 'AS' }, card) and card:sub(-1) ~= 'H'
+      return not util.contains({ 'QS', 'KS', 'AS' }, card) and cards.getSuit(card) ~= 'H'
     end
   )[1] or cards.getSecondHighestRank(playableCards)[1]
   return highestSafeCard

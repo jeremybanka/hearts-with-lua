@@ -106,6 +106,8 @@ local function playGame()
       -- :playAs('Ralsei')
       -- :playAs('Noelle')
       :startGame()
+  local you = game:getVessels()[1]
+  table.insert(you.hand, "RK")
   while not game:isOver() do
     local player = game:getCurrentPlayer()
     if player then

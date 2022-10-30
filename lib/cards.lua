@@ -16,9 +16,11 @@ lib.FANCY_SUITS = {
 ---@return string
 function lib.name(card)
   local rank = card:sub(1, -2)
-  local suit = card:sub(-1)
+  local suit = lib.getSuit(card)
   if rank == 'J' and suit == 'S' then
     return 'LANCER'
+  elseif rank == 'R' and suit == 'K' then
+    return 'ROUXLS KAARD'
   else
     return rank .. lib.FANCY_SUITS[suit]
   end
@@ -114,7 +116,7 @@ end
 function lib.filterSuit(cards, suit)
   local filtered = {}
   for _, card in ipairs(cards) do
-    if card:sub(-1) == suit then
+    if lib.getSuit(card) == suit then
       table.insert(filtered, card)
     end
   end
@@ -128,11 +130,19 @@ end
 function lib.filterOutSuit(cards, suit)
   local filtered = {}
   for _, card in ipairs(cards) do
-    if card:sub(-1) ~= suit then
+    if lib.getSuit(card) ~= suit then
       table.insert(filtered, card)
     end
   end
   return filtered
+end
+
+---get suit of card
+---@param card string
+---@return string
+function lib.getSuit(card)
+  -- if card == 'RK' then error("ERROR: THIS CARD DOESN'T HAVE A SUIT") end
+  return card:sub(-1)
 end
 
 ---hearts: get points for card
@@ -140,12 +150,15 @@ end
 ---@return integer
 function lib.getPoints(card)
   -- hearts are worth 1 point
-  if card:sub(-1) == 'H' then
+  if lib.getSuit(card) == 'H' then
     return 1
   end
   -- queen of spades is worth 13 points
-  if card:sub(1, -2) == 'Q' and card:sub(-1) == 'S' then
+  if card:sub(1, -2) == 'Q' and lib.getSuit(card) == 'S' then
     return 13
+  end
+  if card:sub(1, -2) == 'R' and lib.getSuit(card) == 'K' then
+    return math.maxinteger
   end
   -- all other cards are worth 0 points
   return 0

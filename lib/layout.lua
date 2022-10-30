@@ -8,13 +8,12 @@ local layout = {}
 ---@return string
 function layout.cell(size, text)
   local lastThree = text:sub(-3)
-  local suitCharacters = {
-    '♠', '♥', '♦', '♣'
-  }
+  local suitCharacters = { '♠', '♥', '♦', '♣' }
   if (util.contains(suitCharacters, lastThree)) then
     size = size + 2
   end
-  local cell = text:sub(1, size)
+  -- normally, we'd truncate the text to fit the cell, but there's a special case...
+  local cell = text --:sub(1, size)
   return cell .. string.rep(' ', size - #cell)
 end
 

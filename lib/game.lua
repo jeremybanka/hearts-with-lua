@@ -189,19 +189,19 @@ function gamelib.getPlayableCards(game, playerName)
   local playerMustFollowSuit = util.some(
     player.hand,
     function(card)
-      return card:sub(-1) == game.leadingSuit
+      return cards.getSuit(card) == game.leadingSuit
     end
   )
   local playerHasOnlyHearts = not util.some(
     player.hand,
     function(card)
-      return card:sub(-1) ~= 'H'
+      return cards.getSuit(card) ~= 'H'
     end
   )
   local heartsMayBeBroken = playerHasOnlyHearts or game.round ~= 1
 
   for _, card in ipairs(player.hand) do
-    local suit = card:sub(-1)
+    local suit = cards.getSuit(card)
 
     if #trickEntries == 0 then
       if game.round == 1 then
@@ -237,7 +237,7 @@ function gamelib.playCard(game, playerName, card)
   if not util.contains(playableCards, card) then
     return game
   end
-  local suit = card:sub(-1)
+  local suit = cards.getSuit(card)
   if not game.heartsBroken and suit == 'H' then
     game.heartsBroken = true
   end
@@ -318,7 +318,7 @@ function gamelib.getTrickTaker(game)
   local takersCard = trickEntries[1].val
   for _, entry in ipairs(trickEntries) do
     local card = entry.val
-    local suit = card:sub(-1)
+    local suit = cards.getSuit(card)
     if suit == game.leadingSuit then
       local numRank = cards.getNumericRank(card)
       local numRankW = cards.getNumericRank(takersCard)
@@ -341,7 +341,7 @@ function gamelib.mayWinTrick(game, card)
   if #trickEntries == 0 then
     return "maybe"
   end
-  local suit = card:sub(-1)
+  local suit = cards.getSuit(card)
   if suit ~= game.leadingSuit then
     return "no"
   end
