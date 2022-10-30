@@ -1,6 +1,7 @@
 local speech = require "lib.speech"
 
 ---@class NarrativeBeat : table
+---@field speaker? string
 ---@field description (fun(game: gamelib): string) | string
 ---@field instruction (fun(game: gamelib): nil) | string | nil
 
@@ -47,9 +48,17 @@ function narrationlib.narrate(game, narrative)
     game.narrativeMarker = game.narrativeMarker + 1
     for i = 1, game.narrativeMarker do
       local description = normalizeDescription(narrative[i].description)
+      local speaker = narrative[i].speaker or ""
+
       if i < game.narrativeMarker then
+        if speaker ~= "" then
+          print(speaker .. ": ")
+        end
         print("* " .. description)
       else
+        if speaker ~= "" then
+          print(speaker .. ": ")
+        end
         speech.say(description)
       end
     end

@@ -92,6 +92,22 @@ function util.reduce(values, reducer, initial)
   return acc
 end
 
+---port of Array.prototype.concat from JavaScript
+---@generic Value
+---@param values Value[]
+---@param otherValues Value[]
+---@return Value[]
+function util.concat(values, otherValues)
+  local result = {}
+  for _, v in ipairs(values) do
+    table.insert(result, v)
+  end
+  for _, v in ipairs(otherValues) do
+    table.insert(result, v)
+  end
+  return result
+end
+
 ---@class entry<V>: { key: string; val: V }
 
 ---port of Object.entries from JavaScript

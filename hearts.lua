@@ -60,7 +60,7 @@ local function yourTurn(game, player)
   ---@type NarrativeBeat[]
   local narrative = {
     {
-      description = "It's your turn!",
+      description = player.name .. "! It's your turn!",
       instruction = "choose a card to play"
     },
     {
