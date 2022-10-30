@@ -311,7 +311,7 @@ end
 
 ---check who won the trick
 ---@param game gamelib
----@return player?
+---@return player, string
 function gamelib.getTrickTaker(game)
   local trickEntries = util.entries(game.trick)
   local takersName = trickEntries[1].key
@@ -328,7 +328,33 @@ function gamelib.getTrickTaker(game)
       end
     end
   end
-  return game:getPlayer(takersName)
+  local taker = game:getPlayer(takersName)
+  return taker, takersCard
+end
+
+---check if a card may win the trick
+---@param game gamelib
+---@param card string
+---@return "yes"|"no"|"maybe"
+function gamelib.mayWinTrick(game, card)
+  local trickEntries = util.entries(game.trick)
+  if #trickEntries == 0 then
+    return "maybe"
+  end
+  local suit = card:sub(-1)
+  if suit ~= game.leadingSuit then
+    return "no"
+  end
+  local _, currentLeadingCard = game:getTrickTaker()
+  local numRank = cards.getNumericRank(card)
+  local numRankW = cards.getNumericRank(currentLeadingCard)
+  if numRank < numRankW then
+    return "no"
+  end
+  if #trickEntries == #game.players - 1 then
+    return "yes"
+  end
+  return "maybe"
 end
 
 ---hearts: get points for trick
