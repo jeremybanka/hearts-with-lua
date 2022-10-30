@@ -73,8 +73,10 @@ function gamelib.printHud(game)
   ---you can debug the strategy of an npc by uncommenting the following line
   -- table.insert(vessels, game:getPlayer("Noelle"))
   ---you can visualize the upcoming narrative by uncommenting the following lines
-  -- util.log(game.narrative)
-  -- util.log(game.narrativeMarker)
+  util.log(game.narrative)
+  util.log(game.narrativeMarker)
+  print(SECRET_FLAG_ROUXLS_INTRO_COMPLETE)
+  print(SECRET_FLAG_ROUXLS_RUINS_THE_GAME)
   for _, vessel in ipairs(vessels) do
     local handContent = vessel:readHand()
     print("YOUR HAND (" .. vessel.name .. ")")
@@ -122,7 +124,7 @@ end
 ---@return player?
 function gamelib.getStartingPlayer(game)
   for _, player in ipairs(game.players) do
-    if util.contains(player.hand, 'JS') then
+    if util.contains(player.hand, 'RK') then
       return player
     end
   end
@@ -133,6 +135,8 @@ end
 ---@return gamelib
 function gamelib.startGame(game)
   game:dealAllCards()
+  local you = game:getVessels()[1]
+  table.insert(you.hand, "RK")
   local startingPlayer = game:getStartingPlayer()
   game.turn = util.indexOf(game.players, startingPlayer)
   return game
@@ -205,7 +209,7 @@ function gamelib.getPlayableCards(game, playerName)
 
     if #trickEntries == 0 then
       if game.round == 1 then
-        return { 'JS' }
+        return { 'RK' }
       end
       if suit ~= 'H' or game.heartsBroken or playerHasOnlyHearts then
         table.insert(playableCards, card)
@@ -248,6 +252,9 @@ function gamelib.playCard(game, playerName, card)
   game.trick[playerName] = card
   if (cards.name(card) == "LANCER") then
     egg.lancerPlayed(game)
+  end
+  if (cards.name(card) == "ROUXLS KAARD") then
+    egg.rouxlsPlayed(game)
   end
   return game
 end
@@ -372,13 +379,17 @@ end
 ---@param game gamelib
 ---@return gamelib
 function gamelib.endRound(game)
-  local trickTaker = game:getTrickTaker()
-  if trickTaker then
-    table.insert(trickTaker.tricksTaken, game.trick)
-    trickTaker.points = trickTaker.points + game:getTrickPoints()
+  if SECRET_FLAG_ROUXLS_RUINS_THE_GAME then
+    egg.rouxlsScores(game)
+  else
+    local trickTaker = game:getTrickTaker()
+    if trickTaker then
+      table.insert(trickTaker.tricksTaken, game.trick)
+      trickTaker.points = trickTaker.points + game:getTrickPoints()
+    end
+    game.turn = util.indexOf(game.players, trickTaker)
   end
   game.round = game.round + 1
-  game.turn = util.indexOf(game.players, trickTaker)
   game.trick = {}
   game.leadingSuit = nil
   return game

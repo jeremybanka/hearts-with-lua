@@ -1,5 +1,6 @@
-local util = require "lib.util"
-local cards = require "lib.cards"
+local util        = require "lib.util"
+local cards       = require "lib.cards"
+local egg         = require "lib.SECRET.SPOILER_ALERT.PROCEED_AT_YUOR_OWN_RISK.egg"
 ---@class StrategyLib : table
 local strategylib = {}
 
