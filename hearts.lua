@@ -5,8 +5,6 @@ local printer   = require "lib.printer"
 local narration = require "lib.narration"
 local strategy  = require "lib.SECRET.strategy"
 
-_ = {}
-
 ---prompt the player to play a card
 ---@param game gamelib
 ---@return nil
