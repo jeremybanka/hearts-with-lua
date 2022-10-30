@@ -72,7 +72,7 @@ function gamelib.printHud(game)
   local vessels = game:getVessels()
   ---you can debug the strategy of an npc by uncommenting the following line
   -- table.insert(vessels, game:getPlayer("Noelle"))
-  ---you can visualize the upcoming narrative by uncommenting the following line
+  ---you can visualize the upcoming narrative by uncommenting the following lines
   -- util.log(game.narrative)
   -- util.log(game.narrativeMarker)
   for _, vessel in ipairs(vessels) do
