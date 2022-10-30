@@ -121,6 +121,20 @@ function lib.filterSuit(cards, suit)
   return filtered
 end
 
+---filter to cards without a certain suit
+---@param cards string[]
+---@param suit string
+---@return string[]
+function lib.filterOutSuit(cards, suit)
+  local filtered = {}
+  for _, card in ipairs(cards) do
+    if card:sub(-1) ~= suit then
+      table.insert(filtered, card)
+    end
+  end
+  return filtered
+end
+
 ---hearts: get points for card
 ---@param card string
 ---@return integer
