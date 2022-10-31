@@ -179,12 +179,12 @@ function egg.rouxlsScores(game)
       local samesiesNames = util.map(samesies, function(p) return p.name end)
       if #samesiesNames == 1 then
         samesiesMessage = "Samesies! " ..
-            samesiesNames[1] .. " hath playedest the same card as mine! I awarde ye 100 points of merit!"
+            samesiesNames[1] .. " hath playedest the same card as mine! I awarde ye a hundreth points of merit!"
       else
         local lastSamesiesName = table.remove(samesiesNames)
         local samesiesList = table.concat(samesiesNames, ", ") .. " and " .. lastSamesiesName
         samesiesMessage = "Samesies! " ..
-            samesiesList .. " hath playedest the same card as mine! I awardeth thou 100 points of merit!"
+            samesiesList .. " hath playedest the same card as mine! I awardeth thou one onehundreth points of merit!"
       end
     end
 
