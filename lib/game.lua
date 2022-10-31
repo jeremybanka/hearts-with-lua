@@ -32,6 +32,9 @@ gamelib.narrativeMarker = 0
 ---@param game gamelib
 ---@return boolean
 function gamelib.isOver(game)
+  if SECRET_FLAG_ROUXLS_RUINS_THE_GAME then
+    return egg.rouxlsEndGame(game)
+  end
   return util.every(game.players, function(player)
     return #player.hand == 0
   end) and #util.entries(game.trick) == 0

@@ -224,4 +224,17 @@ function egg.rouxlsScores(game)
   SECRET_TALLY_ROUXLS_ROUND_COUNTER = SECRET_TALLY_ROUXLS_ROUND_COUNTER + 1
 end
 
+---@param game gamelib
+---@return boolean
+function egg.rouxlsEndGame(game)
+  local playersWithEmptyHands = util.filter(
+    game.players,
+    function(p) return #p.hand == 0 end
+  )
+  if #playersWithEmptyHands == #game.players - 2 then
+    return true
+  end
+  return false
+end
+
 return egg
