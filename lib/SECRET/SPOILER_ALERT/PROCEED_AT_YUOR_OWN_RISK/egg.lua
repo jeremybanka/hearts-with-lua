@@ -51,6 +51,8 @@ end
 
 SECRET_FLAG_ROUXLS_RUINS_THE_GAME = false
 SECRET_FLAG_ROUXLS_INTRO_COMPLETE = false
+SECRET_FLAG_ROUXLS_ADDS_MECHANICS = false
+SECRET_FLAG_RALSEI_GIVES_FEEDBACK = false
 
 ---@param game gamelib
 ---@return nil
@@ -142,19 +144,82 @@ function egg.rouxlsScores(game)
     local rouxlsScoringIntro = {
       {
         speaker = "Rouxls Kaard",
-        description = "Scoring's time! I shall now tally the roundeth!",
+        description = "Scoring time! I shall now tally the roundeth!",
+      }, {
+        speaker = "Rouxls Kaard",
+        description = "Any player who arest samesies as me shalt be awardeth points of merit.",
       }, {
         speaker = "Rouxls Kaard",
         description = "Remembere ye well, come game's end, yon player with the manyest pointes will be decreed the winningmost!",
-      }, {
-        speaker = "Rouxls Kaard",
-        description = "And always keepeth in mind, blackend cards are worth thrice!",
       }
     }
     SECRET_FLAG_ROUXLS_INTRO_COMPLETE = true
     game:narrate(rouxlsScoringIntro)
   end
+  ---roulxs basically just gives points to the players who play the same rank of card he played
+  ---he refers to this as "samesies". "Samesies" is worth 100 points. It's a great, fair game that's really fun.
+  if (game.trick.Rouxls ~= nil) then
+    local rouxls = game:getPlayer("Rouxls")
+    local rouxlsCard = game.trick.Rouxls
+    local rouxlsRank = cards.getNumericRank(rouxlsCard)
+    local rouxlsScore = 100
+    local samesies = util.filter(game.players,
+      function(p)
+        local card = game.trick[p.name]
+        return card ~= nil and cards.getNumericRank(card) == rouxlsRank and p.name ~= "Rouxls"
+      end)
 
+    -- rouxls is disappointed if nobody played the same card as him
+    local samesiesMessage = "Gah! No player hath playedest the same card as mine!"
+    if SECRET_FLAG_ROUXLS_ADDS_MECHANICS then
+      samesiesMessage = "Gah! No player hath playedest the same card as mine! I REBUKE THOU!"
+    end
+    if #samesies > 0 then
+      local samesiesNames = util.map(samesies, function(p) return p.name end)
+      if #samesiesNames == 1 then
+        samesiesMessage = "Samesies! " ..
+            samesiesNames[1] .. " hath playedest the same card as mine! I awarde ye 100 points of merit!"
+      else
+        local lastSamesiesName = table.remove(samesiesNames)
+        local samesiesList = table.concat(samesiesNames, ", ") .. " and " .. lastSamesiesName
+        samesiesMessage = "Samesies! " ..
+            samesiesList .. " hath playedest the same card as mine! I awardeth thou 100 points of merit!"
+      end
+    end
+
+    game:narrate({ { description = samesiesMessage } })
+    if #samesies == 0 and SECRET_FLAG_ROUXLS_ADDS_MECHANICS then
+      -- lower all points if nobody played the same card as rouxls
+      for _, p in ipairs(game.players) do
+        p.points = p.points - 10000
+
+
+      end
+      game:narrate({ {
+        speaker = "Ralsei",
+        description = "I'm not sure if REBUKE a good idea, Mr. Rouxls, but I admire your commitment to fun!"
+      } })
+    end
+    if game.round == 4 then
+      game:narrate({ {
+        speaker = "Susie",
+        description = "What the hell, Rouxls? There's no way we can get more points than you!"
+      }, {
+        speaker = "Rouxls Kaard",
+        description = "Whilst I believeth the game is fair, I doth not believen't that the game is quite enough fun. I shall addeth a mechanism to bemake the game more fun!"
+      }, {
+        speaker = "Rouxls Kaard",
+        description = "Let's the game beginth!",
+      } })
+      SECRET_FLAG_ROUXLS_ADDS_MECHANICS = true
+    end
+    if #samesies > 0 then
+      for _, p in ipairs(samesies) do
+        p.points = p.points + rouxlsScore
+      end
+      rouxls.points = rouxls.points + rouxlsScore
+    end
+  end
 end
 
 return egg

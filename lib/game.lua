@@ -57,11 +57,21 @@ function gamelib.endGame(game)
       return acc
     end
   end, game.players[1])
-  print(winner.name .. " wins!")
-  print("FINAL POINTS:")
+  game:narrate({ {
+    description = "The game is over! " .. winner.name .. " wins!",
+  }, {
+    description = "Final scores:",
+  } })
   for _, player in pairs(game.players) do
     print(player.name .. ": " .. player.points)
   end
+  if (SECRET_FLAG_ROUXLS_RUINS_THE_GAME) then
+    game:narrate({ {
+      speaker = "Rouxls Kaard",
+      description = "This is an impropriety! I hadst the most many of pointes!"
+    } })
+  end
+  print("Thanks for playing!")
 end
 
 ---heads up display
@@ -73,10 +83,8 @@ function gamelib.printHud(game)
   ---you can debug the strategy of an npc by uncommenting the following line
   -- table.insert(vessels, game:getPlayer("Noelle"))
   ---you can visualize the upcoming narrative by uncommenting the following lines
-  util.log(game.narrative)
-  util.log(game.narrativeMarker)
-  print(SECRET_FLAG_ROUXLS_INTRO_COMPLETE)
-  print(SECRET_FLAG_ROUXLS_RUINS_THE_GAME)
+  -- util.log(game.narrative)
+  -- util.log(game.narrativeMarker)
   for _, vessel in ipairs(vessels) do
     local handContent = vessel:readHand()
     print("YOUR HAND (" .. vessel.name .. ")")
@@ -136,7 +144,7 @@ end
 function gamelib.startGame(game)
   game:dealAllCards()
   local you = game:getVessels()[1]
-  table.insert(you.hand, "RK")
+  table.insert(you.hand, "RK") -- 🥚
   local startingPlayer = game:getStartingPlayer()
   game.turn = util.indexOf(game.players, startingPlayer)
   return game
