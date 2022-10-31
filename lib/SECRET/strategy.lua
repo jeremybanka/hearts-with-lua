@@ -218,10 +218,7 @@ function strategylib.Noelle(game, playerName)
     } })
     return highestCards[1]
   end
-  game:interruptNarrative({ {
-    speaker = playerName,
-    description = "Time to get rid of my high card. I'll play " .. cards.name(highestCards[1]) .. "..."
-  } })
+
   -- print("highest:", highestCards[1])
   local highestSafeCard = util.filter(
     highestCards,
@@ -229,6 +226,10 @@ function strategylib.Noelle(game, playerName)
       return not util.contains({ 'QS', 'KS', 'AS' }, card) and cards.getSuit(card) ~= 'H'
     end
   )[1] or cards.getSecondHighestRank(playableCards)[1]
+  game:interruptNarrative({ {
+    speaker = playerName,
+    description = "Time to get rid of my high card. I'll play " .. cards.name(highestSafeCard) .. "..."
+  } })
   return highestSafeCard
 end
 
