@@ -132,7 +132,7 @@ end
 ---@return player?
 function gamelib.getStartingPlayer(game)
   for _, player in ipairs(game.players) do
-    if util.contains(player.hand, 'RK') then
+    if util.contains(player.hand, '2C') then
       return player
     end
   end
@@ -144,7 +144,7 @@ end
 function gamelib.startGame(game)
   game:dealAllCards()
   local you = game:getVessels()[1]
-  table.insert(you.hand, "RK") -- 🥚
+  table.insert(you.hand, 'RK') -- 🥚
   local startingPlayer = game:getStartingPlayer()
   game.turn = util.indexOf(game.players, startingPlayer)
   return game
@@ -217,7 +217,7 @@ function gamelib.getPlayableCards(game, playerName)
 
     if #trickEntries == 0 then
       if game.round == 1 then
-        return { 'RK' }
+        return { '2C' }
       end
       if suit ~= 'H' or game.heartsBroken or playerHasOnlyHearts then
         table.insert(playableCards, card)

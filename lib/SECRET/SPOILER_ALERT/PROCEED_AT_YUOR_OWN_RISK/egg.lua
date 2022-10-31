@@ -50,6 +50,7 @@ function egg.lancerPlayed(game)
 end
 
 SECRET_FLAG_ROUXLS_RUINS_THE_GAME = false
+SECRET_TALLY_ROUXLS_ROUND_COUNTER = 0
 SECRET_FLAG_ROUXLS_INTRO_COMPLETE = false
 SECRET_FLAG_ROUXLS_ADDS_MECHANICS = false
 SECRET_FLAG_RALSEI_GIVES_FEEDBACK = false
@@ -200,7 +201,7 @@ function egg.rouxlsScores(game)
         description = "I'm not sure if REBUKE a good idea, Mr. Rouxls, but I admire your commitment to fun!"
       } })
     end
-    if game.round == 4 then
+    if SECRET_TALLY_ROUXLS_ROUND_COUNTER > 3 then
       game:narrate({ {
         speaker = "Susie",
         description = "What the hell, Rouxls? There's no way we can get more points than you!"
@@ -220,6 +221,7 @@ function egg.rouxlsScores(game)
       rouxls.points = rouxls.points + rouxlsScore
     end
   end
+  SECRET_TALLY_ROUXLS_ROUND_COUNTER = SECRET_TALLY_ROUXLS_ROUND_COUNTER + 1
 end
 
 return egg
