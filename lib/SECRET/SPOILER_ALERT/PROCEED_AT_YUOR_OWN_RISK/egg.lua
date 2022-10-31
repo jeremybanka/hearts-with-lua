@@ -201,7 +201,7 @@ function egg.rouxlsScores(game)
         description = "I'm not sure if REBUKE a good idea, Mr. Rouxls, but I admire your commitment to fun!"
       } })
     end
-    if SECRET_TALLY_ROUXLS_ROUND_COUNTER > 3 then
+    if SECRET_TALLY_ROUXLS_ROUND_COUNTER > 3 and SECRET_FLAG_ROUXLS_ADDS_MECHANICS == false then
       game:narrate({ {
         speaker = "Susie",
         description = "What the hell, Rouxls? There's no way we can get more points than you!"
