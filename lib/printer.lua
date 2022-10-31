@@ -8,8 +8,7 @@ local printerlib = {}
 ---@param line string
 ---@param speed? number
 ---@return nil
-function printerlib.say(line, speed)
-  io.write('* ')
+function printerlib.slowprint(line, speed)
   for i = 1, #line do
     io.write(line:sub(i, i))
     io.flush()
@@ -18,20 +17,43 @@ function printerlib.say(line, speed)
   print()
 end
 
+---print line with asterisk, character by character
+---@param line string
+---@param speed? number
+---@return nil
+function printerlib.say(line, speed)
+  io.write('* ')
+  printerlib.paragraph(
+    line,
+    {
+      printer = printerlib.slowprint,
+      indentFirstLine = 0,
+      indent = 2
+    }
+  )
+end
+
 -- print line with asterisk
 ---@param line string
 ---@return nil
 function printerlib.said(line)
-  print('* ' .. line)
+  io.write('* ')
+  printerlib.paragraph(
+    line,
+    {
+      indentFirstLine = 0,
+      indent = 2
+    }
+  )
 end
 
 ---print an array of lines
 ---@param lines string[]
+---@printer? fun(line: string): nil
 ---@return nil
-function printerlib.lines(lines)
-  for _, v in pairs(lines) do
-    print(v)
-  end
+function printerlib.lines(lines, printer)
+  local p = printer or print
+  for _, v in pairs(lines) do p(v) end
 end
 
 ---@class TabularPrinterOptions
@@ -56,7 +78,12 @@ end
 
 ---@class WrappingPrinterOptions
 ---@field lineLength? integer
+---@field lineSpacing? integer
+---@field indent? integer
+---@field indentFirstLine? integer
+---@field printer fun(text: string): nil
 printerlib.defaultWrappingPrinterOptions = {
+  printer = print,
   lineLength = 80,
   lineSpacing = 1,
   indent = 0,
@@ -70,17 +97,17 @@ function printerlib.wrapping(content, options)
   options = options or {}
   options = util.merge(printerlib.defaultWrappingPrinterOptions, options)
   ---@type string[]
-  local lines = { "" }
-  local length = 0
+  local lines = { string.rep(' ', options.indentFirstLine) }
+  local length = options.indentFirstLine
   for _, v in pairs(content) do
     if length + #v > options.lineLength then
-      table.insert(lines, '')
+      table.insert(lines, string.rep(' ', options.indent))
       length = 0
     end
     lines[#lines] = lines[#lines] .. v
     length = length + #v
   end
-  printerlib.lines(lines)
+  printerlib.lines(lines, options.printer)
 end
 
 ---PARAGRAPH
