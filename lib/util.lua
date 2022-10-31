@@ -128,10 +128,14 @@ end
 ---@param t2 T2
 ---@return T1 & T2
 function util.merge(t1, t2)
-  for k, v in pairs(t2) do
-    t1[k] = v
+  local result = {}
+  for k, v in pairs(t1) do
+    result[k] = v
   end
-  return t1
+  for k, v in pairs(t2) do
+    result[k] = v
+  end
+  return result
 end
 
 ---invert the nesting structure of a nested Array
